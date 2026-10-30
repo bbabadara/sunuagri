@@ -65,8 +65,8 @@ producteur jusqu'au paiement dû.
 | US-05 | Déclarer une culture | réalisée |
 | US-06 | Suivre l'avancement d'une culture | réalisée |
 | US-07 | Déclarer une récolte | réalisée |
-| US-08 | Livrer une récolte à l'entrepôt | à faire |
-| US-09 | Consulter le stock | à faire |
+| US-08 | Livrer une récolte à l'entrepôt | réalisée |
+| US-09 | Consulter le stock | réalisée |
 | US-10 | Publier une offre de vente | à faire |
 | US-11 | Passer une commande | à faire |
 | US-12 | Annuler une commande | à faire |

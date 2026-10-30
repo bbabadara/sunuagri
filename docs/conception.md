@@ -81,6 +81,32 @@ cultures existantes (préparation US-19).
 - Rendement = quantité / superficie emblavée ; refus si > 2 × rendement de référence.
 - Une culture ne peut être récoltée qu'une fois (statut `RECOLTEE`).
 
+### Contexte `entrepot`
+
+| Agrégat | Entités / value objects | Invariants |
+| --- | --- | --- |
+| `Lot` | `Livraison`, `StockLigne` | quantité > 0 ; consommation jamais supérieure au disponible ; un lot est identifié, rattaché à un producteur et daté. |
+| `Stock` (projection) | `StockLigne` | total = somme des lots disponibles ; réservé = somme des offres en cours ; disponible = total − réservé. |
+
+### US-08 — Livrer une récolte à l'entrepôt
+
+- La culture doit être au statut `RECOLTEE`.
+- Quantité > 0.
+- Humidité ≤ seuil capturé dans les paramètres de la culture.
+- Cumul des livraisons ≤ quantité récoltée.
+- Chaque livraison acceptée crée un `Lot` (producteur, culture, qualité, date, quantité).
+- Toutes les vérifications ont lieu avant toute écriture : une livraison refusée ne
+  modifie rien.
+
+### US-09 — Consulter le stock
+
+- Agrégation par culture et par qualité.
+- `total` = somme des quantités encore disponibles dans les lots.
+- `réservé` = quantité réservée par les offres non retirées (port
+  `ReservationsStockPort`, fourni par le contexte commercialisation).
+- `disponible` = total − réservé, borné à zéro.
+- Les lots sont consommés du plus ancien au plus récent (FIFO) via `StockPort`.
+
 ## 4. Hypothèses retenues
 
 - Une seule coopérative : pas de multi-tenant.
