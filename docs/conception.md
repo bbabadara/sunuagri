@@ -20,11 +20,66 @@ directes entre leurs domaines. Les adapters réalisent le branchement.
 
 ## 2. Agrégats et invariants
 
-(à compléter phase par phase)
+### Contexte `production`
+
+| Agrégat | Entités / value objects | Invariants |
+| --- | --- | --- |
+| `Producteur` | `Parcelle` | nom, prénom, village obligatoires ; téléphone unique (application) ; superficie > 0 ; noms de parcelles uniques (insensible à la casse) ; total des superficies ≤ maximum paramétré (50 ha par défaut). |
+| `Campagne` | `Saison`, `StatutCampagne` | saison obligatoire ; année positive ; date de fin > date de début ; unicité (saison, année) ; clôture irréversible ; une campagne clôturée refuse cultures, semis et récoltes. |
+| `Culture` | `StatutCulture`, `ParametresCulture` | campagne ouverte ; type du référentiel ; superficie > 0 ; somme des superficies emblavées ≤ superficie de la parcelle ; statut PLANIFIEE → SEMEE → RECOLTEE sans retour ; récolte ≥ semis + cycle minimal ; rendement ≤ 2 × rendement de référence ; une seule récolte. |
+
+`ParametresCulture` est un **instantané** des valeurs de référence (rendement, humidité,
+cycle) pris à la déclaration de la culture : modifier le référentiel n'affecte pas les
+cultures existantes (préparation US-19).
 
 ## 3. Règles métier par user story
 
-(à compléter phase par phase)
+### US-01 — Enregistrer un producteur
+
+- Téléphone unique : vérifié dans `ProducteurService.enregistrer` avant création.
+- Nom, prénom, village obligatoires : `Producteur.creer` via `Validations`.
+- Téléphone déjà utilisé → HTTP 409 avec le code `TELEPHONE_DEJA_UTILISE`.
+- Identifiant UUID généré et renvoyé.
+
+### US-02 — Déclarer une parcelle
+
+- Superficie strictement positive : `Parcelle` + `@DecimalMin`.
+- Total ≤ 50 ha : `Producteur.ajouterParcelle` avec la valeur paramétrée.
+- Nom unique par producteur : `Producteur.ajouterParcelle` (insensible à la casse).
+- Une parcelle appartient à un seul producteur par construction (entité interne).
+
+### US-03 — Consulter les parcelles d'un producteur
+
+- Liste et détail exposés.
+- Producteur inexistant → HTTP 404. Producteur d'autrui → HTTP 404 (US-17).
+
+### US-04 — Ouvrir et clôturer une campagne
+
+- Saison limitée à `HIVERNAGE` ou `CONTRE_SAISON`.
+- Date de fin > date de début.
+- Unicité (saison, année) → HTTP 409 `CAMPAGNE_DEJA_OUVERTE`.
+- Clôture idempotente refusée : double clôture → 422.
+
+### US-05 — Déclarer une culture
+
+- Campagne ouverte exigée.
+- Type présent dans le référentiel configuré.
+- Superficie > 0 et cumul ≤ superficie de la parcelle.
+- Statut initial `PLANIFIEE`, paramètres de référence figés.
+
+### US-06 — Suivre l'avancement d'une culture
+
+- `semer` uniquement depuis `PLANIFIEE`.
+- `recolter` uniquement depuis `SEMEE`.
+- La date de récolte doit être ≥ date de semis + cycle minimal.
+- Aucun retour en arrière possible.
+
+### US-07 — Déclarer une récolte
+
+- La culture doit être semée.
+- Quantité > 0.
+- Rendement = quantité / superficie emblavée ; refus si > 2 × rendement de référence.
+- Une culture ne peut être récoltée qu'une fois (statut `RECOLTEE`).
 
 ## 4. Hypothèses retenues
 
