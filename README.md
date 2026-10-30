@@ -58,13 +58,13 @@ producteur jusqu'au paiement dû.
 
 | Story | Intitulé | Statut |
 | --- | --- | --- |
-| US-01 | Enregistrer un producteur | à faire |
-| US-02 | Déclarer une parcelle | à faire |
-| US-03 | Consulter les parcelles d'un producteur | à faire |
-| US-04 | Ouvrir et clôturer une campagne | à faire |
-| US-05 | Déclarer une culture | à faire |
-| US-06 | Suivre l'avancement d'une culture | à faire |
-| US-07 | Déclarer une récolte | à faire |
+| US-01 | Enregistrer un producteur | réalisée |
+| US-02 | Déclarer une parcelle | réalisée |
+| US-03 | Consulter les parcelles d'un producteur | réalisée |
+| US-04 | Ouvrir et clôturer une campagne | réalisée |
+| US-05 | Déclarer une culture | réalisée |
+| US-06 | Suivre l'avancement d'une culture | réalisée |
+| US-07 | Déclarer une récolte | réalisée |
 | US-08 | Livrer une récolte à l'entrepôt | à faire |
 | US-09 | Consulter le stock | à faire |
 | US-10 | Publier une offre de vente | à faire |
