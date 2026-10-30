@@ -67,11 +67,11 @@ producteur jusqu'au paiement dû.
 | US-07 | Déclarer une récolte | réalisée |
 | US-08 | Livrer une récolte à l'entrepôt | réalisée |
 | US-09 | Consulter le stock | réalisée |
-| US-10 | Publier une offre de vente | à faire |
-| US-11 | Passer une commande | à faire |
-| US-12 | Annuler une commande | à faire |
-| US-13 | Livrer une commande et répartir le paiement | à faire |
-| US-14 | Être prévenu par SMS d'un paiement | à faire |
+| US-10 | Publier une offre de vente | réalisée |
+| US-11 | Passer une commande | réalisée |
+| US-12 | Annuler une commande | réalisée |
+| US-13 | Livrer une commande et répartir le paiement | réalisée |
+| US-14 | Être prévenu par SMS d'un paiement | réalisée |
 | US-15 | Importer des producteurs en lot | à faire |
-| US-16 | Consulter l'historique de mes commandes | à faire |
+| US-16 | Consulter l'historique de mes commandes | réalisée |
 | US-17 | Accéder uniquement à ce qui me concerne | à faire |
