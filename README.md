@@ -72,6 +72,6 @@ producteur jusqu'au paiement dû.
 | US-12 | Annuler une commande | réalisée |
 | US-13 | Livrer une commande et répartir le paiement | réalisée |
 | US-14 | Être prévenu par SMS d'un paiement | réalisée |
-| US-15 | Importer des producteurs en lot | à faire |
+| US-15 | Importer des producteurs en lot | réalisée |
 | US-16 | Consulter l'historique de mes commandes | réalisée |
-| US-17 | Accéder uniquement à ce qui me concerne | à faire |
+| US-17 | Accéder uniquement à ce qui me concerne | réalisée |

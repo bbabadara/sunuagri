@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import sn.sunagri.shared.domain.AccesRefuseException;
 import sn.sunagri.shared.domain.AuthentificationException;
 import sn.sunagri.shared.domain.ConflitException;
@@ -82,6 +83,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
             MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class,
             MethodArgumentTypeMismatchException.class,
             IllegalArgumentException.class
     })

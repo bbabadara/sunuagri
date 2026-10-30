@@ -159,6 +159,35 @@ cultures existantes (préparation US-19).
 - Un SMS au plus par paiement : `PaiementDu.smsEnvoye` n'est positionné qu'après succès.
 - Un échec d'envoi n'annule pas la livraison ; il est tracé dans `JournalNotifications`.
 
+### US-15 — Importer des producteurs en lot
+
+- Endpoint `POST /api/v1/producteurs/import` (`multipart/form-data`, champ `fichier`).
+- Format UTF-8 : `nom;prénom;téléphone;village`, une ligne par producteur ; l'en-tête
+  est optionnel ; les lignes vides et les commentaires `#` sont ignorés.
+- Chaque ligne valide passe par `ProducteurService.enregistrer` : les règles de US-01
+  s'appliquent à l'identique (téléphone unique, champs obligatoires).
+- Une ligne invalide n'empêche pas l'enregistrement des autres ; elle est rapportée avec
+  son numéro de ligne et son motif.
+- Le compte rendu final indique le total, le nombre d'acceptées et de refusées, la liste
+  des producteurs créés et la liste des rejets.
+- Un fichier vide → 422 `FICHIER_VIDE` ; un fichier dépassant la limite multipart
+  (5 Mo par défaut) → 413.
+
+### US-17 — Accéder uniquement à ce qui me concerne
+
+| Acteur | Données accessibles |
+| --- | --- |
+| `PRODUCTEUR` | ses propres parcelles, cultures, récoltes et paiements |
+| `ACHETEUR` | les offres ouvertes et ses propres commandes |
+| `AGENT`, `ADMIN` | les données de la coopérative (producteurs, campagnes, stock, offres, commandes, paiements) |
+
+- Les lectures d'une ressource appartenant à un autre acteur renvoient 404, jamais 403,
+  pour ne pas révéler son existence.
+- Les opérations réservées à un rôle renvoient 403 (`AccesRefuseException`) : par
+  exemple un producteur qui tente de publier une offre ou d'importer des producteurs.
+- L'identité est résolue à chaque requête depuis `X-User-Id` par `CurrentUserService` ;
+  les services métier appliquent les contrôles, pas les contrôleurs.
+
 ## 4. Hypothèses retenues
 
 - Une seule coopérative : pas de multi-tenant.
