@@ -1,0 +1,235 @@
+PROJET SUNUAGRI — SUJET
+Module 5.1 : DDD, architecture hexagonale et API Design · Domaine agricole
+1. Contexte
+SunuAgri est une plateforme numérique pour une coopérative de producteurs agricoles du Sénégal (cas fictif). 
+La coopérative suit ses producteurs, leurs parcelles et leurs cultures au fil des campagnes agricoles, reçoit les 
+récoltes dans son entrepôt, puis les vend à des acheteurs (grossistes, transformateurs). Quand une commande est 
+livrée, l'argent de la vente est réparti entre les producteurs qui ont apporté la marchandise.
+Aujourd'hui, tout se fait sur des cahiers et des tableurs : les erreurs de calcul, les doubles saisies et les litiges sur 
+les paiements sont fréquents. La coopérative vous demande de concevoir et de réaliser le cœur de sa plateforme.
+2. Les acteurs
+Acteur Rôle
+Producteur Agriculteur membre de la coopérative. Il cultive des parcelles et apporte sa récolte.
+Agent de coopérative Employé qui enregistre les producteurs, suit les campagnes, reçoit les récoltes et gère 
+les ventes.
+Acheteur Grossiste ou transformateur qui commande de la marchandise à la coopérative.
+Administrateur Responsable des paramètres de la plateforme.
+3. Vocabulaire du métier
+Ce vocabulaire est celui de la coopérative. À vous de l'affiner : il doit se retrouver dans votre code, votre contrat 
+d'API et vos documents.
+Terme Sens
+Producteur Personne qui cultive et apporte une récolte à la coopérative.
+Parcelle Terrain d'un producteur, avec une superficie en hectares.
+Campagne Saison agricole (hivernage ou contre-saison) d'une année donnée.
+Culture Plante cultivée sur une parcelle pendant une campagne.
+Récolte Quantité produite par une culture, en kilogrammes.
+Livraison à l'entrepôt Apport d'une récolte à la coopérative, qui crée un lot de stock.
+Lot Quantité reçue d'un producteur, avec sa qualité et son taux d'humidité.
+Offre Quantité à vendre, avec un prix au kilogramme.
+Commande Demande d'un acheteur sur une offre.
+Paiement dû Part du montant d'une commande qui revient à un producteur.
+4. Valeurs de référence
+Pour cet exercice, utilisez ces valeurs fictives. Elles peuvent changer : elles ne doivent pas être écrites partout 
+dans votre code.
+Culture Rendement de référence 
+(kg/ha)
+Humidité maximale (%) Cycle minimal (jours)
+Arachide 1 200 9 90
+Mil 800 12 75
+Riz 4 000 14 110
+Maïs 2 500 14 90
+Autres valeurs : superficie maximale par producteur 50 ha ; commande minimale 50 kg ; commission de la 
+coopérative 5 % ; écart de prix avertissant à 30 %. Les montants sont en francs CFA (XOF).
+5. Les user stories
+Chaque story porte une priorité. Vous devez réaliser toutes les stories Indispensables et, parmi les Importantes, 
+celles que vous pouvez mener à bien. Les stories Bonus sont facultatives.
+A. Producteurs et parcelles
+US-01 · Enregistrer un producteur  (Indispensable)
+En tant que agent de coopérative, je veux enregistrer un producteur (nom, prénom, téléphone, village), afin de 
+suivre ses activités.
+Critères d'acceptation :
+• Un producteur est identifié par son numéro de téléphone, unique dans la coopérative.
+• Nom, prénom et village sont obligatoires.
+• Un téléphone déjà utilisé est refusé avec une explication claire.
+• Un producteur enregistré reçoit un identifiant.
+US-02 · Déclarer une parcelle  (Indispensable)
+En tant que agent de coopérative, je veux déclarer une parcelle d'un producteur (nom, superficie en hectares, 
+commune), afin de connaître les terres exploitées.
+Critères d'acceptation :
+• La superficie est strictement positive.
+• Le total des superficies déclarées par un producteur ne dépasse pas 50 hectares.
+• Deux parcelles d'un même producteur ne peuvent pas porter le même nom.
+• Une parcelle appartient à un seul producteur.
+US-03 · Consulter les parcelles d'un producteur  (Importante)
+En tant que agent de coopérative, je veux consulter la liste et le détail des parcelles d'un producteur, afin de 
+préparer les visites de terrain.
+Critères d'acceptation :
+• Je vois pour chaque parcelle son nom, sa commune et sa superficie.
+• Si le producteur n'existe pas, j'en suis informé clairement.
+B. Campagnes et cultures
+US-04 · Ouvrir et clôturer une campagne  (Indispensable)
+En tant que agent de coopérative, je veux ouvrir une campagne agricole (saison, année, date de début et date 
+de fin) puis la clôturer, afin de organiser le suivi d'une saison.
+Critères d'acceptation :
+• La saison est « hivernage » ou « contre-saison ».
+• La date de fin est postérieure à la date de début.
+• Une même saison d'une même année ne peut avoir qu'une campagne.
+• Une campagne clôturée n'accepte plus de nouvelle culture ni de récolte.
+US-05 · Déclarer une culture sur une parcelle  (Indispensable)
+En tant que agent de coopérative, je veux déclarer une culture sur une parcelle pour une campagne (culture, 
+superficie emblavée), afin de planifier la production.
+Critères d'acceptation :
+• La campagne doit être ouverte.
+• La culture fait partie de la liste de référence.
+• La superficie emblavée est strictement positive.
+• Sur une parcelle et pour une campagne, la somme des superficies emblavées ne dépasse pas la superficie de 
+la parcelle.
+• Une culture déclarée a pour statut initial « planifiée ».
+US-06 · Suivre l'avancement d'une culture  (Importante)
+En tant que agent de coopérative, je veux enregistrer qu'une culture est semée (date de semis) puis récoltée 
+(date de récolte), afin de suivre le calendrier agricole.
+Critères d'acceptation :
+• Le statut suit l'ordre : planifiée, semée, récoltée. Aucun retour en arrière.
+• La date de récolte est postérieure à la date de semis d'au moins le cycle minimal de la culture.
+C. Récoltes et stock
+US-07 · Déclarer une récolte  (Indispensable)
+En tant que agent de coopérative, je veux déclarer la quantité récoltée (en kg) d'une culture, afin de connaître 
+la production réelle.
+Critères d'acceptation :
+• La culture doit être semée.
+• La quantité est strictement positive.
+• Une récolte dont le rendement dépasse deux fois le rendement de référence de la culture est refusée comme 
+suspecte.
+• Une culture ne peut être récoltée qu'une seule fois.
+US-08 · Livrer une récolte à l'entrepôt  (Indispensable)
+En tant que agent de coopérative, je veux enregistrer la livraison d'une récolte à l'entrepôt (quantité, taux 
+d'humidité, qualité A, B ou C), afin de alimenter le stock de la coopérative.
+Critères d'acceptation :
+• Le cumul des quantités livrées ne dépasse pas la quantité récoltée.
+• Une livraison dont l'humidité dépasse le seuil de la culture est refusée.
+• Chaque livraison acceptée crée un lot de stock identifiable, rattaché au producteur et daté.
+• Une livraison refusée ne modifie rien.
+US-09 · Consulter le stock  (Importante)
+En tant que agent de coopérative, je veux consulter le stock par culture et par qualité (total, réservé, 
+disponible), afin de savoir ce que je peux vendre.
+Critères d'acceptation :
+• Le disponible est le total moins le réservé.
+• Les chiffres restent cohérents après chaque vente, annulation ou livraison.
+D. Commercialisation
+US-10 · Publier une offre de vente  (Indispensable)
+En tant que agent de coopérative, je veux publier une offre de vente (culture, qualité, quantité, prix au kg en 
+XOF), afin de vendre la production aux acheteurs.
+Critères d'acceptation :
+• La quantité de l'offre ne dépasse pas le stock disponible de cette culture et de cette qualité.
+• Le prix est strictement positif.
+• Une offre publiée réserve la quantité correspondante.
+• Une offre est ouverte, épuisée ou retirée ; retirer une offre libère la quantité non vendue.
+US-11 · Passer une commande  (Indispensable)
+En tant que acheteur, je veux commander une quantité sur une offre ouverte, afin de acheter la marchandise 
+dont j'ai besoin.
+Critères d'acceptation :
+• La quantité commandée ne dépasse pas la quantité restante de l'offre.
+• La quantité minimale d'une commande est de 50 kg.
+• Le montant de la commande est la quantité multipliée par le prix au kg.
+• Une commande est créée avec le statut « en attente » ; l'offre devient épuisée quand plus rien ne reste.
+US-12 · Annuler une commande  (Importante)
+En tant que acheteur, je veux annuler ma commande, afin de corriger une erreur ou un changement de besoin.
+Critères d'acceptation :
+• L'annulation est possible tant que la commande n'est pas livrée.
+• La quantité annulée redevient disponible dans l'offre.
+• Annuler une commande livrée est refusé.
+US-13 · Livrer une commande et répartir le paiement  (Indispensable)
+En tant que agent de coopérative, je veux confirmer la livraison d'une commande, pour que les producteurs 
+soient payés, afin de rémunérer chaque producteur selon sa part.
+Critères d'acceptation :
+• La livraison consomme les lots de la culture et de la qualité demandées, du plus ancien au plus récent.
+• Le montant de la commande est réparti entre les producteurs proportionnellement à la quantité qu'ils ont 
+apportée dans les lots consommés.
+• La coopérative retient une commission de 5 % avant la répartition.
+• La somme des paiements et de la commission est exactement égale au montant de la commande : aucun 
+franc ne se perd ni n'apparaît. La règle d'arrondi est à vous de définir et de documenter.
+• Chaque paiement dû est enregistré avec le statut « à payer ».
+• Une commande déjà livrée ou annulée ne peut pas être livrée.
+E. Services, accès et intégrations
+US-14 · Être prévenu par SMS d'un paiement  (Importante)
+En tant que producteur, je veux recevoir un SMS lorsqu'un paiement m'est dû, afin de savoir quand je serai 
+payé.
+Critères d'acceptation :
+• Le SMS indique le montant, en français.
+• Un SMS n'est envoyé qu'une seule fois par paiement.
+• Si l'envoi échoue, la livraison reste valide et l'échec est tracé.
+US-15 · Importer des producteurs en lot  (Importante)
+En tant que agent de coopérative, je veux importer un fichier CSV de producteurs (nom ; prénom ; téléphone ; 
+village), afin de gagner du temps à l'inscription d'une coopérative entière.
+Critères d'acceptation :
+• Les mêmes règles que l'enregistrement d'un producteur s'appliquent.
+• Les lignes valides sont enregistrées ; les lignes invalides sont rapportées avec leur numéro et leur motif.
+• Un compte rendu final indique le nombre de lignes acceptées et refusées.
+US-16 · Consulter l'historique de mes commandes  (Importante)
+En tant que acheteur, je veux consulter mes commandes, paginées, de la plus récente à la plus ancienne, avec 
+un filtre par statut, afin de suivre mes achats.
+Critères d'acceptation :
+• Un grand nombre de commandes ne doit pas ralentir ni alourdir les réponses.
+• Je ne vois que mes propres commandes.
+US-17 · Accéder uniquement à ce qui me concerne  (Indispensable)
+En tant que utilisateur de la plateforme, je veux ne voir que les données qui me concernent selon mon rôle, 
+afin de protéger les informations de chacun.
+Critères d'acceptation :
+• Un producteur consulte uniquement ses propres parcelles, cultures, récoltes et paiements.
+• Un acheteur consulte les offres ouvertes et ses propres commandes.
+• Un agent accède aux données de sa coopérative.
+• Demander la ressource d'un autre ne doit pas révéler qu'elle existe.
+US-18 · Connaître le prix de référence du marché  (Bonus)
+En tant que agent de coopérative, je veux consulter le prix de référence du marché d'une culture, fourni par un 
+service externe, afin de fixer mes prix de vente.
+Critères d'acceptation :
+• Si le service externe est indisponible, le dernier prix connu est affiché avec sa date et l'application continue 
+de fonctionner.
+• Une offre dont le prix s'écarte de plus de 30 % du prix de référence est publiée avec un avertissement, sans 
+être refusée.
+US-19 · Gérer les paramètres des cultures  (Bonus)
+En tant que administrateur, je veux consulter et modifier les paramètres d'une culture (rendement de référence, 
+humidité maximale, cycle minimal), afin de adapter les règles à la réalité du terrain.
+Critères d'acceptation :
+• Une modification s'applique aux déclarations futures, jamais aux anciennes.
+• Les valeurs sont strictement positives.
+6. Exigences transversales
+Elles s'appliquent à l'ensemble du projet. Elles disent ce qui est attendu, pas comment l'obtenir.
+Réf.
+Exigence
+E1
+Toutes les règles métier se vérifient par des tests automatisés rapides, sans démarrer de serveur web ni de 
+base de données.
+E2
+Le choix de la base de données, du service d'envoi de SMS et de la source des prix doit pouvoir changer sans 
+modifier les règles métier.
+E3
+Une règle métier n'existe qu'à un seul endroit : la même règle s'applique quelle que soit la façon dont la 
+demande arrive.
+E4
+Le vocabulaire du métier est celui du code, de l'API et de la documentation.
+E5
+L'API est décrite par un contrat OpenAPI, cohérent avec son comportement réel.
+E6
+Toutes les erreurs de l'API suivent un format unique et documenté, sans détail interne.
+E7
+L'API est conçue pour évoluer sans casser les clients qui l'utilisent déjà.
+E8
+Les décisions d'architecture importantes sont justifiées par écrit.
+7. Livrables
+• Le dépôt Git du projet, avec un historique de commits lisible.
+• Le code source et ses tests automatisés.
+• Le contrat OpenAPI de l'API.
+• Le glossaire du projet.
+• Un document de conception : les contextes que vous avez identifiés, les agrégats, et les règles métier de 
+chaque story réalisée.
+• Au moins 3 décisions d'architecture documentées (contexte, décision, conséquences).
+• Un README qui explique comment lancer le projet et les tests, et la liste des stories réalisées.
+• Une démonstration d'un scénario complet : de l'enregistrement d'un producteur jusqu'au paiement dû.
+8. Cadre
+• Le projet est individuel. Technologies : Java et Spring Boot, comme dans le cours.
+• Il n'y a pas de guide d'implémentation : vos choix sont les vôtres, mais vous devez pouvoir les justifier.
+• Hors périmètre : écrans, vrai paiement mobile, inscription et connexion complètes des utilisateurs (vous 
+pouvez simuler l'identité des utilisateurs), envoi réel de SMS (une simulation suffit).
+• Vous pouvez consulter vos notes et la documentation. Le travail d'un autre étudiant ne se recopie pas.
+• Si une règle vous paraît ambiguë, notez l'hypothèse que vous retenez dans votre document de conception.

@@ -1,0 +1,57 @@
+server:
+  port: 8080
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+spring:
+  application:
+    name: sunuagri
+  jackson:
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+sunagri:
+  parametres:
+    superficie-max-producteur-ha: 50
+    commande-minimale-kg: 50
+    taux-commission: 0.05
+    ecart-prix-avertissement: 0.30
+  referentiel:
+    cultures:
+      ARACHIDE:
+        libelle: Arachide
+        rendement-kg-ha: 1200
+        humidite-max: 9
+        cycle-min-jours: 90
+      MIL:
+        libelle: Mil
+        rendement-kg-ha: 800
+        humidite-max: 12
+        cycle-min-jours: 75
+      RIZ:
+        libelle: Riz
+        rendement-kg-ha: 4000
+        humidite-max: 14
+        cycle-min-jours: 110
+      MAIS:
+        libelle: Mais
+        rendement-kg-ha: 2500
+        humidite-max: 14
+        cycle-min-jours: 90
