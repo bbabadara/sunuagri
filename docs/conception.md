@@ -107,6 +107,58 @@ cultures existantes (préparation US-19).
 - `disponible` = total − réservé, borné à zéro.
 - Les lots sont consommés du plus ancien au plus récent (FIFO) via `StockPort`.
 
+### Contexte `commercialisation`
+
+| Agrégat | Entités / value objects | Invariants |
+| --- | --- | --- |
+| `Offre` | `StatutOffre` | quantité et prix > 0 ; la quantité publiée ne dépasse pas le stock disponible ; statuts `OUVERTE` → `EPUISEE` / `RETIREE` ; retirer libère la quantité non vendue ; une commande ne dépasse pas la quantité restante. |
+| `Commande` | `StatutCommande` | acheteur obligatoire ; quantité > 0 et ≥ minimum paramétré ; montant = quantité × prix arrondi au franc (`HALF_UP`) ; statut `EN_ATTENTE` → `LIVREE` ou `ANNULEE` ; une commande livrée ne peut plus être annulée. |
+| `PaiementDu` | `StatutPaiement` | montant > 0 ; statut initial `A_PAYER` ; un SMS au plus par paiement (`smsEnvoye`). |
+| `RepartitionPaiement` | `ResultatRepartition` | commission prélevée avant répartition ; somme des parts + commission = montant ; plus forts restes avec départage par UUID (ADR-0004). |
+
+### US-10 — Publier une offre de vente
+
+- Culture et qualité obligatoires, quantité et prix strictement positifs.
+- `quantite ≤ stock disponible` : `OffreService.publier` interroge `StockPort.quantiteDisponible`.
+- Une offre publiée réserve sa quantité : `ReservationsStockPort` est fourni par
+  `commercialisation/adapter/out/stock/ReservationsStockAdapter`.
+- Statuts : `OUVERTE`, `EPUISEE`, `RETIREE`. `retirer` déplace la quantité restante vers
+  `quantiteRetiree`, ce qui libère la réservation du stock.
+
+### US-11 — Passer une commande
+
+- Réservé au rôle `ACHETEUR`.
+- Quantité ≥ `sunagri.parametres.commande-minimale-kg` (50 kg par défaut).
+- Quantité ≤ quantité restante de l'offre ; l'offre devient `EPUISEE` quand elle atteint zéro.
+- Montant = quantité × prix au kg, arrondi au franc (`HALF_UP`).
+- Statut initial `EN_ATTENTE`.
+
+### US-12 — Annuler une commande
+
+- Un acheteur ne peut annuler que sa propre commande ; un tiers reçoit un 404.
+- Annulation possible uniquement avant livraison.
+- La quantité annulée retourne dans `quantiteRestante` ; une offre `EPUISEE` redevient
+  `OUVERTE`.
+- Si l'offre a été retirée entre-temps, la quantité annulée rejoint `quantiteRetiree`.
+
+### US-13 — Livrer une commande et répartir le paiement
+
+- Réservé aux rôles `AGENT` et `ADMIN` ; seule une commande `EN_ATTENTE` est livrable.
+- `StockPort.consommer` prélève les lots FIFO par culture et qualité.
+- Les quantités apportées sont agrégées par producteur ; la commission paramétrée
+  (5 % par défaut) est retenue puis le reste est réparti par `RepartitionPaiement`.
+- Chaque part strictement positive crée un `PaiementDu` au statut `A_PAYER`.
+- `Σ paiements + commission = montant de la commande` (testé).
+- La livraison met à jour la quantité livrée de l'offre, le statut de la commande et
+  déclenche la notification (US-14).
+
+### US-14 — Être prévenu par SMS d'un paiement
+
+- `NotificationPaiementSimulee` envoie un SMS par paiement via `SmsSender` (simulé).
+- Le message est en français et contient le montant en XOF.
+- Un SMS au plus par paiement : `PaiementDu.smsEnvoye` n'est positionné qu'après succès.
+- Un échec d'envoi n'annule pas la livraison ; il est tracé dans `JournalNotifications`.
+
 ## 4. Hypothèses retenues
 
 - Une seule coopérative : pas de multi-tenant.
