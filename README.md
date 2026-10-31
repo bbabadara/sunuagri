@@ -42,6 +42,17 @@ L'identité est portée par l'en-tête `X-User-Id` :
 
 Sans en-tête valide, l'API répond `401`.
 
+## Tester l'API avec Swagger UI
+
+1. Lancer l'application : `mvn spring-boot:run`.
+2. Ouvrir http://localhost:8080/swagger-ui.html.
+3. Cliquer sur **Authorize** et saisir une identité (`agent-1`, `admin-1`,
+   `acheteur:client-1`, `producteur:<uuid>`).
+4. Choisir un endpoint, cliquer sur **Try it out**, renseigner les paramètres puis
+   **Execute**.
+
+Le contrat OpenAPI est généré à la volée sur http://localhost:8080/v3/api-docs.
+
 ## Scénario de démonstration
 
 Voir `docs/demonstration.md` pour le scénario complet, de l'enregistrement d'un
